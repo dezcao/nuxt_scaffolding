@@ -1,5 +1,6 @@
 import LocalScheme from '@nuxtjs/auth/lib/schemes/local'
 
+// nuxt sample 복붙, 현재는 의미없음.
 export default class CustomScheme extends LocalScheme {
   // Override `fetchUser` method of `local` scheme
   async fetchUser (endpoint) {

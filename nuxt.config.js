@@ -1,7 +1,6 @@
-// import bodyParser from 'body-parser'
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser') // for the serverMiddleware
 module.exports = {
-	mode: 'universal',
+	// mode: 'universal',
 	head: {
 		title: process.env.npm_package_name || '',
 		meta: [
@@ -13,17 +12,28 @@ module.exports = {
 			{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
 		]
 	},
-	vue: {
-		config: {
-			productionTip: false,
-			devtools: true
-		}
-	},
-	/*
-	** Customize the progress-bar color
-	*/
-	loading: { color: '#fff' },
+	// vue: {
+	// 	config: {
+	// 		productionTip: false,
+	// 		devtools: true
+	// 	}
+	// },
+	loading: { color: '#fff' }, // Customize the progress-bar color
 	css: [
+	],
+	modules: [
+		// Doc: https://bootstrap-vue.js.org
+		'bootstrap-vue/nuxt',
+		// Doc: https://axios.nuxtjs.org/usage
+		'@nuxtjs/axios',
+		// Doc: https://github.com/nuxt-community/dotenv-module
+		'@nuxtjs/dotenv',
+		// NPM: npm i nuxt-vuex-router-sync --save-dev
+		'nuxt-vuex-router-sync',
+		// NPM: npm install @nuxtjs/auth --save-dev
+		'@nuxtjs/auth',
+		// '@nuxtjs/proxy', // npm i @nuxtjs/proxy
+		// '@nuxtjs/sitemap'
 	],
 	// sitemap: {
 	//   exclude: [
@@ -37,70 +47,58 @@ module.exports = {
 	//     return await sitemapRoutes(baseUrl)
 	//   }
 	// },
+	// proxy: {
+	// 	'/api/': { 
+	// 		target: 'http://13.125.206.217:3000/', 
+	// 		pathRewrite: {'^/api/': '/api/'}, 
+	// 		changeOrigin: true }
+	// },
 	axios: {
-		baseURL: 'http://localhost:3000/'
-		// baseURL: 'http://13.125.206.217:3000/',
+		baseURL: process.env.baseURL || 'http://localhost:3000/',
 		// proxy: true
+		// credentials: true,
+		// retry: false
 	},
-	proxy: {
-		// '/api/': { 
-		// 	target: 'http://13.125.206.217:3000/', 
-		// 	pathRewrite: {'^/api/': '/api/'}, 
-		// 	changeOrigin: true }
-	},
-	plugins: [
-		{ src: '~/plugins/axios.js' }
-	],
-	modules: [
-		// Doc: https://bootstrap-vue.js.org
-		'bootstrap-vue/nuxt',
-		// Doc: https://axios.nuxtjs.org/usage
-		'@nuxtjs/axios',
-		// Doc: https://github.com/nuxt-community/dotenv-module
-		'@nuxtjs/dotenv',
-		// NPM: npm i nuxt-vuex-router-sync --save-dev
-		'nuxt-vuex-router-sync',
-		// NPM: npm install @nuxtjs/auth --save-dev
-		'@nuxtjs/auth',
-		// npm i @nuxtjs/proxy
-		// '@nuxtjs/proxy'
-		// '@nuxtjs/sitemap'
-	],
 	router: {
-    // middleware: ['admin-auth']
-  },
+		// middleware: ['admin-login'] // 매 라우팅 마다 적용. 이걸 쓰지않고 반대로, 일부 Vue에서 선별 사용하겠음.
+	},
 	serverMiddleware: [
-		bodyParser.json(),
-		// { path: '/api/auth/login', handler: '~/api/admin-login.js' }
+		// bodyParser.json(),
+		// { path: '/api/login', handler: '~/api/admin-login.js' }
+	],
+	plugins: [
+		// nuxt server 내에서 axios 발생시키면 거쳐감.
+		// { src: '~/plugins/axios.js'},
+		// { src: '~/plugins/auth.js'}
 	],
 	auth: {
-		// plugins: [ '~/plugins/auth.js' ], // 플러그인 필요하면 쓴다.
+		// plugins: [ '~/plugins/auth.js' ],
+		// localStorage: true,
+		// watchLoggedIn: false,
 		strategies: {
 			local: {
 				// token: {
-        //   property: 'access'
-        // },
-        // refreshToken: {
-        //   property: 'refresh' // change to your refresh token property
-        // },
+				//   property: 'access'
+				//   expiresIn: '30m'
+				// },
+				// refreshToken: {
+				//   property: 'refresh' // change to your refresh token property
+				// },
 				endpoints: {
-					// login: {url: '/api/login', method: 'post', propertyName: 'token.access', altProperty: 'token.refresh'},
-					// login: {url: '/api/login', method: 'post' ,propertyName: 'token.access'},
-					login: {url: '/api/login', method: 'post' },
+					login: {url: '/api/login', method: 'post', propertyName: 'token.access', altProperty: 'refresh'},
+					// refresh: {url: 'api/token/refresh', method: 'post', propertyName: ''},
 					logout: false,
 					user: { url: '/api/user', method: 'get', propertyName: 'user' }
 				},
-				tokenRequired: false, // ture이면 JWT인 것으로 보인다. 잘 안된다.
-				tokenType: false,
-				// globalToken: true,
-				// autoFetchUser: true
+				tokenType: ''
 			}
 		},
 		redirect: {
-      home: '/',
-      callback: '/about',
-      logout: '/'
-    }
+			home: '/auth/write', // 로그인된 후에 리다이렉트
+			// login: '/admin', // 로그인이 필요하면 여기로 리다이렉트
+			logout: '/', // 로그아웃 후에 리다이렉트
+			// callback: '/', // 로그인 후에 특정한 요청이 있는 리다이렉트 ?? User will be redirected to this path by the identity provider after login.
+		}
 	},
 	buildModules: [
 		// Doc: https://github.com/nuxt-community/eslint-module
@@ -112,7 +110,7 @@ module.exports = {
 		** You can extend webpack config here
 		*/
 		extend(config, ctx) {
-			// Run ESLint on save
+			// Run ESLint on save:  npm run lint --fix
 			if (ctx.isDev && ctx.isClient) {
 				// config.module.rules.push({
 				// 	enforce: 'pre',
@@ -123,6 +121,7 @@ module.exports = {
 			}
 		}
 	},
+
 	server: {
 		port: process.env.PORT || 8000
 	}

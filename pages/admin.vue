@@ -1,12 +1,7 @@
 <template>
   <div>
-    <h1>auth Login : {{ $auth.loggedIn }}</h1>
-    <h1>auth User : {{ $auth.user }}</h1>
-    <h1>store Login : {{ $store.state.auth.loggedIn }}</h1>
-    <h1>sotre User : {{ $store.state.auth.user }}</h1>
-    <h1>token : {{ $store.state.auth.token }}</h1>
-
-    <form @submit="userLogin">
+    <h1>store Login : {{ $store.getters.loggedIn }}</h1>
+    <h1>store User : {{ $store.getters.user }}</h1>
       <div>
         <label>Username</label>
         <input type="text" v-model="login.username" />
@@ -16,11 +11,8 @@
         <input type="text" v-model="login.password" />
       </div>
       <div>
-        <button type="submit">Submit</button>
+        <button type="submit" @click="userLogin">Submit</button>
       </div>
-    </form>
-
-		<button @click="$auth.logout()">logout</button>
   </div>
 </template>
 
@@ -28,50 +20,28 @@
 import { mapState } from "vuex";
 import axios from "axios";
 export default {
-  // middleware: ['auth'], // 이 뷰컴포넌트에서 적용될 미들웨어
-  data() {
-    return {
-      login: {
-        username: "jaepil",
-        password: "abcde"
-      }
-    };
-  },
-  mounted() {
-    // console.log(this.$auth)
-  },
-//   async asyncData(context) {
-//     // let rs = await axios.get('http://13.125.206.217:3000/api/login');
-//     // console.log(rs.data);
-//     // console.log(rs.data);
-//     // let { response } = await axios.get('dataURL', {}, { headers: {"Authorization" : `Bearer ${context.app.$auth.getToken('local')}`} })
-//     // return { token: rs.data.token }
-//   },
-  methods: {
-    async userLogin() {
-      try {
-        // let rs = await axios.get('http://localhost:3000/api/login');
-        // console.log(rs);
-        let rs = await this.$auth.loginWith("local", { data: this.login });
-
-        // this.$store.dispatch(, {});
-        // this.$router.push('/');
-      } catch (error) {
-        console.log(error);
-      }
-    },
-    async userLogout() {
-      try {
-        // let rs = await axios.get('http://localhost:3000/api/login');
-        // console.log(rs);
-        let rs = await this.$auth.logout();
-
-        // this.$store.dispatch(, {});
-        // this.$router.push('/');
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  }
+	data() {
+		return {
+			login: {
+				username: "jaepil",
+				password: "abcde"
+			}
+		};
+	},
+	methods: {
+		async userLogin() {
+			try {
+				await this.$auth.loginWith("local", { data: this.login });
+				// if (this.$store.getters.loggedIn) {
+				if (this.$auth.loggedIn) {
+					console.log('저 로그인 되었어요~');
+					return;
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		},
+		
+	}
 };
 </script>

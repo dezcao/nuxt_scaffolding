@@ -23,8 +23,6 @@ async function start () {
   // Give nuxt middleware to express
   app.use(nuxt.render)
 
-  // wrapAsync() 때문에 호출될 것입니다. (businessLogicLayer 처리중 에러 유발시키면 여기서 잡힌다.)
-  // http://jeonghwan-kim.github.io/node/2017/08/17/express-error-handling.html
   app.use(function(error, req, res, next) {
 		console.log(error);
   })
